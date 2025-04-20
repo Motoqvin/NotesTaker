@@ -1,32 +1,43 @@
 using NotesTakerApp.Core.Models;
+using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Core.Services;
 
 namespace NotesTakerApp.Infrastructure.Services;
 
 public class UserService : IUserService
 {
+    private readonly IUserRepository userRepository;
+
+    public UserService(IUserRepository userRepository)
+    {
+        this.userRepository = userRepository;
+    }
     public Task AddUserAsync(User user)
     {
-        throw new NotImplementedException();
+        userRepository.CreateUserAsync(user);
+        return Task.CompletedTask;
     }
 
     public Task DeleteUserAsync(int id)
     {
-        throw new NotImplementedException();
+        userRepository.DeleteUserAsync(id);
+        return Task.CompletedTask;
     }
 
-    public Task<List<User>> GetAllUsersAsync()
+    public async Task<List<User>> GetAllUsersAsync()
     {
-        throw new NotImplementedException();
+        return await userRepository.GetAllUsersAsync();
     }
 
     public Task<User> GetUserByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        var user = userRepository.GetUserByIdAsync(id);
+        return user;
     }
 
     public Task UpdateUserAsync(User user)
     {
-        throw new NotImplementedException();
+        userRepository.UpdateUserAsync(user);
+        return Task.CompletedTask;
     }
 }
