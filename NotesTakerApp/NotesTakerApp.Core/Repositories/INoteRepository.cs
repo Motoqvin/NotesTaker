@@ -7,5 +7,5 @@ public interface INoteRepository
     public Task CreateNoteAsync(Note note);
     public Task DeleteNoteAsync(int id);
     public Task UpdateNoteAsync(Note note);
-    public Task<IEnumerable<Note>> GetAllNotesAsync(int userId);
+    public Task<List<Note>> GetAllNotesAsync(int userId);
 }
