@@ -11,6 +11,11 @@ public class NotesTakerSqlServerDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<User>()
+        .HasMany(n => n.Notes)
+        .WithMany(t => t.Users)
+        .UsingEntity(j => j.ToTable("UserNotes"));
+
         base.OnModelCreating(modelBuilder);
     }
 }
