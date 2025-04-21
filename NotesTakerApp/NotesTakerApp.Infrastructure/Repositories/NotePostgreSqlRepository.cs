@@ -14,6 +14,7 @@ public class NotePostgreSqlRepository : INoteRepository
     }
     public Task CreateNoteAsync(Note note)
     {
+        
         DbContext.Notes.Add(note);
         return DbContext.SaveChangesAsync();
     }
