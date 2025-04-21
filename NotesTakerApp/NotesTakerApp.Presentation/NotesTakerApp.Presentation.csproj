@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NotesTakerApp.Infrastructure\NotesTakerApp.Infrastructure.csproj" />
-    
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <PropertyGroup>

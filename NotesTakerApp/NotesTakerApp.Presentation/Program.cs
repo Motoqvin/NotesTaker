@@ -1,11 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Infrastructure.Data;
+using NotesTakerApp.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<NotesTakerSqlServerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerAppSqlServerContext")));
+builder.Services.AddDbContext<NotesTakerNoteDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerAppPostgreSqlServerContext")));
+builder.Services.AddScoped<IUserRepository, UserMSSqlRepository>();
+builder.Services.AddScoped<INoteRepository, NotePostgreSqlRepository>();
 
 var app = builder.Build();
 
@@ -16,7 +22,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); 
+app.UseStaticFiles();
 
 app.UseRouting();
 
