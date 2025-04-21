@@ -8,5 +8,5 @@ public class Note
     public bool IsPinned { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? SharedLink { get; set; }
-    public required List<User> Users { get; set; }
+
 }

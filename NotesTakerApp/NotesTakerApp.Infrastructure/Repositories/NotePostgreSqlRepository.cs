@@ -2,14 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Infrastructure.Data;
-
 namespace NotesTakerApp.Infrastructure.Repositories;
 
-public class NoteMSSqlRepository : INoteRepository
+public class NotePostgreSqlRepository : INoteRepository
 {
-    private readonly NotesTakerSqlServerDbContext DbContext;
+    private readonly NotesTakerNoteDbContext DbContext;
 
-    public NoteMSSqlRepository(NotesTakerSqlServerDbContext dbContext)
+    public NotePostgreSqlRepository(NotesTakerNoteDbContext dbContext)
     {
         DbContext = dbContext;
     }
