@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
-using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Core.Services;
 
 namespace NotesTakerApp.Presentation.Controllers
@@ -40,7 +39,6 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(User user)
         {
             if (ModelState.IsValid)
@@ -59,7 +57,6 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await userService.DeleteUserAsync(id);
