@@ -6,9 +6,9 @@ namespace NotesTakerApp.Infrastructure.Repositories;
 
 public class NotePostgreSqlRepository : INoteRepository
 {
-    private readonly NotesTakerNoteDbContext DbContext;
+    private readonly NotePostgresDbContext DbContext;
 
-    public NotePostgreSqlRepository(NotesTakerNoteDbContext dbContext)
+    public NotePostgreSqlRepository(NotePostgresDbContext dbContext)
     {
         DbContext = dbContext;
     }

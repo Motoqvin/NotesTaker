@@ -3,11 +3,11 @@ using NotesTakerApp.Core.Models;
 
 namespace NotesTakerApp.Infrastructure.Data;
 
-public class NotesTakerNoteDbContext : DbContext
+public class NotePostgresDbContext : DbContext
 {
     
     public DbSet<Note> Notes { get; set; }
-    public NotesTakerNoteDbContext(DbContextOptions<NotesTakerSqlServerDbContext> options) : base(options) {}
+    public NotePostgresDbContext(DbContextOptions<NotePostgresDbContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

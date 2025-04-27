@@ -7,9 +7,9 @@ namespace NotesTakerApp.Infrastructure.Repositories;
 
 public class UserMSSqlRepository : IUserRepository
 {
-    private readonly NotesTakerSqlServerDbContext DbContext;
+    private readonly UserSqlServerDbContext DbContext;
 
-    public UserMSSqlRepository(NotesTakerSqlServerDbContext dbContext)
+    public UserMSSqlRepository(UserSqlServerDbContext dbContext)
     {
         DbContext = dbContext;
     }
