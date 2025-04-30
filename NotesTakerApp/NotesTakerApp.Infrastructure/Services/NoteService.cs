@@ -17,9 +17,9 @@ public class NoteService : INoteService
         return Task.CompletedTask;
     }
 
-    public Task<List<Note>> GetAllNotesAsync(int userId)
+    public List<Note> GetAllNotesAsync()
     {
-        var notes = noteRepository.GetAllNotesAsync(userId);
+        var notes = noteRepository.GetAllNotesAsync();
         return notes;
     }
 
@@ -31,7 +31,7 @@ public class NoteService : INoteService
 
     public Task PostNoteAsync(Note note)
     {
-        noteRepository.CreateNoteAsync(note);
+        noteRepository.CreateNoteAsync(note.Title);
         return Task.CompletedTask;
     }
 

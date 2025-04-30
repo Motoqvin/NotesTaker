@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
-using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Core.Services;
 
 namespace NotesTakerApp.Presentation.Controllers
@@ -15,9 +14,20 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int userId)
+        public async Task<IActionResult> Index()
         {
-            var notes = await noteService.GetAllNotesAsync(userId);
+            var notes = noteService.GetAllNotesAsync();
+            return View(notes);
+        }
+        public IActionResult Index(string search)
+        {
+            var notes = noteService.GetAllNotesAsync();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                notes = (List<Note>)notes.Where(n => n.Title != null && n.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
             return View(notes);
         }
 
@@ -34,35 +44,39 @@ namespace NotesTakerApp.Presentation.Controllers
             return View();
         }
 
+        // POST: Create a new note
         [HttpPost]
-        
-        public async Task<IActionResult> Create(Note note)
+        public async Task<IActionResult> Create(string Title)
         {
-            if (ModelState.IsValid)
+            if (string.IsNullOrEmpty(Title))
             {
-                await noteService.PostNoteAsync(note);
-                return RedirectToAction(nameof(Index), new { userId = note.Id });
+                return RedirectToAction(nameof(Index)); // If no title, just return to the index
             }
-            return View(note);
+
+            var newNote = new Note
+            {
+                Title = Title
+            };
+
+            await noteService.PostNoteAsync(newNote);
+
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Edit(int id)
+        // POST: Update an existing note's content
+        [HttpPost]
+        public async Task<IActionResult> Edit(int Id, string Content)
         {
-            var note = await noteService.GetNoteByIdAsync(id);
-            return View(note);
-        }
-
-        [HttpPut]
-
-        public async Task<IActionResult> Edit(Note note)
-        {
-            if (ModelState.IsValid)
+            var note = await noteService.GetNoteByIdAsync(Id);
+            if (note == null)
             {
-                await noteService.RefreshNoteAsync(note);
-                return RedirectToAction(nameof(Index), new { userId = note.Id });
+                return NotFound(); // If the note is not found
             }
-            return View(note);
+
+            note.Content = Content;
+            await noteService.RefreshNoteAsync(note);
+
+            return RedirectToAction(nameof(Index)); // Redirect back to the index page
         }
 
         [HttpDelete]
@@ -73,11 +87,10 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpDelete, ActionName("Delete")]
-        
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await noteService.DeleteNoteAsync(id);
-            return RedirectToAction(nameof(Index), new { userId = 1 });
+            return RedirectToAction(nameof(Index)); // Redirect to the index page after deletion
         }
     }
 }

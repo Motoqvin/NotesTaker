@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Services;
+using NotesTakerApp.Core.ViewModels;
 
 namespace NotesTakerApp.Presentation.Controllers
 {
@@ -17,18 +18,24 @@ namespace NotesTakerApp.Presentation.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await userService.GetAllUsersAsync();
-            return View("Index", users);
+            var viewModel = new UserViewModel
+            {
+                AllUsers = users
+            };
+            return View(viewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(User user)
+        public async Task<IActionResult> Create(UserViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
-                await userService.AddUserAsync(user);
+                await userService.AddUserAsync(viewModel.NewUser);
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+
+            viewModel.AllUsers = await userService.GetAllUsersAsync();
+            return View("Index", viewModel);
         }
 
         [HttpPut]

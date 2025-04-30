@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Core.Services;
 using NotesTakerApp.Infrastructure.Data;
@@ -13,22 +14,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<UserSqlServerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerAppSqlServerContext")));
-builder.Services.AddDbContext<UsersIdentityDb>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerIdentityServerContext")));
 builder.Services.AddDbContext<NotePostgresDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerAppPostgreSqlServerContext")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("NotesTakerAppPostgreSqlServerContext")));
 builder.Services.AddScoped<IHttpLogRepository, HttpLogMsSqlRepository>();
 builder.Services.AddScoped<IUserRepository, UserMSSqlRepository>();
 builder.Services.AddScoped<INoteRepository, NotePostgreSqlRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddDbContext<UsersIdentityDb>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("IdentityDb");
+    var connectionString = builder.Configuration.GetConnectionString("NotesTakerAppSqlServerContext");
     options.UseSqlServer(connectionString);
 });
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {})
+builder.Services.AddScoped<EmailSender>();
+builder.Services.AddIdentity<User, IdentityRole>(options => {})
     .AddEntityFrameworkStores<UsersIdentityDb>();
 
 builder.Services.AddDataProtection();
@@ -53,11 +52,22 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-var serviceScope = app.Services.CreateScope();
-var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-await roleManager.CreateAsync(new IdentityRole {Name = "Admin"});
-await roleManager.CreateAsync(new IdentityRole {Name = "User"});
+    var adminRole = await roleManager.FindByNameAsync("Admin");
+    if (adminRole == null)
+    {
+        await roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
+    }
+
+    var userRole = await roleManager.FindByNameAsync("User");
+    if (userRole == null)
+    {
+        await roleManager.CreateAsync(new IdentityRole { Name = "User" });
+    }
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -78,4 +88,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-

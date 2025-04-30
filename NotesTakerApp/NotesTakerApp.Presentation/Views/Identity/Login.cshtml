@@ -1,0 +1,20 @@
+
+@using NotesTakerApp.Core.ViewModels
+@model UserViewModel
+
+<form method="post" asp-controller="Identity" asp-action="Login">
+    <div asp-validation-summary="All"></div>
+    <div class="mb-3">
+        <label asp-for="NewUser.Email" class="form-label">Email</label>
+        <input asp-for="NewUser.Email" class="form-control">
+        <span class="text-danger" asp-validation-for="NewUser.Email"></span>
+    </div>
+    
+    <div class="mb-3">
+        <label asp-for="NewUser.PasswordHash" class="form-label">Password</label>
+        <input type="password" asp-for="NewUser.PasswordHash" class="form-control">
+        <span class="text-danger" asp-validation-for="NewUser.PasswordHash"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
