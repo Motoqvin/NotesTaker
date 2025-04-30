@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Email Verification";
+}
+
+<h2>Email Verification</h2>
+
+<form asp-action="VerifyEmail" method="post">
+    <div class="form-group">
+        <label>Verification Code</label>
+        <input type="text" name="verificationCode" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Verify</button>
+</form>

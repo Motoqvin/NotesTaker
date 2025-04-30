@@ -15,10 +15,10 @@ public class NotePostgresDbContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            // Читаем appsettings.json вручную для миграций
+            
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory()) // Текущая папка
-                .AddJsonFile("appsettings.json")               // appsettings.json
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
                 .Build();
 
             var connectionString = configuration.GetConnectionString("NotesTakerAppPostgreSqlServerContext");
