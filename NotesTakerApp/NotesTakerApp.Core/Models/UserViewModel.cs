@@ -1,6 +1,6 @@
 using NotesTakerApp.Core.Models;
 
-namespace NotesTakerApp.Core.ViewModels
+namespace NotesTakerApp.Core.Models
 {
     public class UserViewModel
     {
