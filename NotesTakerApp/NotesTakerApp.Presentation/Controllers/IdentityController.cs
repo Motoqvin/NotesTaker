@@ -2,12 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
-using NotesTakerApp.Core.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace NotesTakerApp.Presentation.Controllers
 {
@@ -26,7 +21,6 @@ namespace NotesTakerApp.Presentation.Controllers
             this.emailSender = emailSender;
         }
 
-        // Index action to show the user's details
         [Authorize]
         [HttpGet]
         public IActionResult Index()
@@ -47,7 +41,6 @@ namespace NotesTakerApp.Presentation.Controllers
             return View(user);
         }
 
-        // Register page - GET method
         [HttpGet]
         public IActionResult Register()
         {
@@ -58,46 +51,42 @@ namespace NotesTakerApp.Presentation.Controllers
             return View();
         }
 
-        // Register page - POST method
         [HttpPost]
-        public async Task<IActionResult> Register([FromForm] UserViewModel newUser)
+        public async Task<IActionResult> Register([FromForm] UserViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                return View(newUser);
+                return View(model);
             }
 
             var user = new User
             {
-                UserName = newUser.NewUser.UserName,
-                Email = newUser.NewUser.Email
+                UserName = model.NewUser.UserName,
+                Email = model.NewUser.Email,
+                PasswordHash = model.NewUser.PasswordHash,
+                Roles = new List<string>()
             };
 
-            // Create the user
-            var result = await userManager.CreateAsync(user, newUser.NewUser.PasswordHash);
+            var result = await userManager.CreateAsync(user, model.NewUser.PasswordHash);
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("All", result.Errors.FirstOrDefault()?.Description);
-                return View(newUser);
+                return View(model);
             }
 
             var foundUser = await userManager.FindByEmailAsync(user.Email);
             if (foundUser == null)
             {
                 ModelState.AddModelError("All", "User creation failed.");
-                return View(newUser);
+                return View(model);
             }
 
-            // Add user to the "User" role
             await userManager.AddToRoleAsync(foundUser, "User");
 
-            // Generate verification code
             var verificationCode = GenerateVerificationCode();
 
-            // Add the verification code as a claim
             await userManager.AddClaimAsync(foundUser, new Claim("VerificationCode", verificationCode));
 
-            // Send the verification email
             try
             {
                 await emailSender.SendEmailAsync(foundUser.Email, "Your Verification Code", $"Your verification code is: {verificationCode}");
@@ -105,21 +94,18 @@ namespace NotesTakerApp.Presentation.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("All", "Error sending email: " + ex.Message);
-                return View(newUser);
+                return View(model);
             }
 
-            // Redirect to the verification page
             return RedirectToAction("VerificationPage");
         }
 
-        // Verification page - GET method
         [HttpGet]
         public IActionResult VerificationPage()
         {
             return View();
         }
 
-        // Verify the email code
         [HttpPost]
         public async Task<IActionResult> VerifyEmail(string userId, string verificationCode)
         {
@@ -141,10 +127,8 @@ namespace NotesTakerApp.Presentation.Controllers
 
             if (verificationCode == storedCode)
             {
-                // Add claim that the email is verified
                 await userManager.AddClaimAsync(user, new Claim("EmailVerified", "true"));
 
-                // Sign in the user
                 await signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction(nameof(Index), "Home");
             }
@@ -153,7 +137,6 @@ namespace NotesTakerApp.Presentation.Controllers
             return View();
         }
 
-        // Login page - GET method
         [HttpGet]
         public IActionResult Login(string? returnUrl)
         {
@@ -170,7 +153,6 @@ namespace NotesTakerApp.Presentation.Controllers
             return View();
         }
 
-        // Login page - POST method
         [HttpPost]
         public async Task<IActionResult> Login(UserViewModel userModel)
         {
@@ -191,7 +173,6 @@ namespace NotesTakerApp.Presentation.Controllers
             return View(userModel);
         }
 
-        // Logout action
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
@@ -216,11 +197,10 @@ namespace NotesTakerApp.Presentation.Controllers
         //     return Ok();
         // }
 
-        // Helper function to generate a verification code
         private string GenerateVerificationCode()
         {
             var random = new Random();
-            var verificationCode = random.Next(100000, 999999);  // Generates a 6-digit number
+            var verificationCode = random.Next(100000, 999999);
             return verificationCode.ToString();
         }
     }

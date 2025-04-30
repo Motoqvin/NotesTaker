@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Services;
-using NotesTakerApp.Core.ViewModels;
 
 namespace NotesTakerApp.Presentation.Controllers
 {
@@ -57,6 +57,7 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var user = await userService.GetUserByIdAsync(id);
@@ -64,6 +65,7 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await userService.DeleteUserAsync(id);
