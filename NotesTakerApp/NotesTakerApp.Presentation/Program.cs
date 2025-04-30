@@ -13,23 +13,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<UserSqlServerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerAppSqlServerContext")));
-builder.Services.AddDbContext<UsersIdentityDb>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerIdentityServerContext")));
+// builder.Services.AddDbContext<UsersIdentityDb>(options =>
+//     options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerIdentityServerContext")));
 builder.Services.AddDbContext<NotePostgresDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerAppPostgreSqlServerContext")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("NotesTakerAppPostgreSqlServerContext")));
 builder.Services.AddScoped<IHttpLogRepository, HttpLogMsSqlRepository>();
 builder.Services.AddScoped<IUserRepository, UserMSSqlRepository>();
 builder.Services.AddScoped<INoteRepository, NotePostgreSqlRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<INoteService, NoteService>();
+// builder.Services.AddDbContext<UsersIdentityDb>(options =>
+// {
+//     var connectionString = builder.Configuration.GetConnectionString("IdentityDb");
+//     options.UseSqlServer(connectionString);
+// });
 
-builder.Services.AddDbContext<UsersIdentityDb>(options =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("IdentityDb");
-    options.UseSqlServer(connectionString);
-});
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {})
-    .AddEntityFrameworkStores<UsersIdentityDb>();
+// builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {})
+//     .AddEntityFrameworkStores<UsersIdentityDb>();
 
 builder.Services.AddDataProtection();
 
@@ -54,10 +54,9 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 var serviceScope = app.Services.CreateScope();
-var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-await roleManager.CreateAsync(new IdentityRole {Name = "Admin"});
-await roleManager.CreateAsync(new IdentityRole {Name = "User"});
+// await roleManager.CreateAsync(new IdentityRole {Name = "Admin"});
+// await roleManager.CreateAsync(new IdentityRole {Name = "User"});
 
 if (!app.Environment.IsDevelopment())
 {

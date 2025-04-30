@@ -1,5 +1,7 @@
 namespace NotesTakerApp.Core.Models;
-public class User
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+public class User : IdentityUser
 {
     public int Id { get; set; }
     public required string Email { get; set; }

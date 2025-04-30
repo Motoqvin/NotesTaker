@@ -1,56 +1,46 @@
-@page
-@using NotesTakerApp.Core.Models
-@using NotesTakerApp.Core.Repositories
-@model User
+@using Azure.Core
+@model IEnumerable<NotesTakerApp.Core.Models.Note>
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Notes";
 }
 
-<h1>@ViewData["Title"]</h1>
+<main role="main" class="pb-3">
+    <h3 style="text-align: center; margin-top: 50px;">Welcome to Notes</h3>
+    @* <form method="get" asp-controller="Notes" asp-action="Index" style="max-width: 300px; margin: 20px auto; text-align: center;">
+    <input type="text" name="search" value="@Request.Query["search"]" class="form-control" placeholder="Search notes..." />
+    <button type="submit" class="btn btn-outline-primary w-100 mt-2">Search</button>
+    </form> *@
+    <form asp-action="Create" method="post" asp-controller="Notes" style="margin-top: 20px; text-align: center;">
+        <input type="text" name="Title" placeholder="New note title..." class="form-control" required style="max-width: 300px; margin: 10px auto;" />
+        <button type="submit" class="btn btn-success w-100 mt-2" style="max-width: 300px; margin: 10px auto;">+ Add Note</button>
+    </form>
 
-@inject IUserRepository userRepository
+    <h5 style="margin-bottom: 10px; color: #777; text-align: center;">ALL NOTES</h5>
 
-@{
-    var users = await userRepository.GetAllUsersAsync();
-}
+    <ul class="list-unstyled" style="padding: 0; margin: 0;">
+    @foreach (var note in Model)
+    {
+        <li style="margin-bottom: 8px; text-align: center;">
+            <a href="@Url.Action("Details", "Notes", new { id = note.Id })" style="text-decoration: none; color: inherit;">
+                <div style="
+                    display: inline-block;
+                    max-width: 300px;
+                    padding: 8px 12px;
+                    background-color: #fffff0;
+                    border-radius: 6px;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+                    transition: background-color 0.2s;
+                    font-size: 0.9rem;
+                    text-align: left;
+                ">
+                    <strong style="display: block; margin-bottom: 4px;">
+                        @(string.IsNullOrEmpty(note.Title) ? "Untitled" : note.Title)
+                    </strong>
+                    <small style="color: #888;">Created @note.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                </div>
+            </a>
+        </li>
+    }
+</ul>
 
-<h2>Create new user</h2>
-
-<form class="row g-3" method="post" action="/Create">
-    <div class="mb-1">
-        <label for="name" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username" name="username">
-    </div>
-
-
-    <button class="btn btn-success">Create</button>
-</form>
-
-<br>
-
-<h2>All users</h2>
-@if(users == null || users.Any() == false) {
-    <h3>...</h3>
-}
-else {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Id</th>
-                <th scope="col">Username</th>
-                
-                <th scope="col"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var user in users) {
-                <tr>
-                    <th><a href="/Index/@user.Id">@user.Id</a></th>
-                    <td>@user.Username</td>
-                    
-                    <td><button class="btn btn-danger" onclick="() => DeleteUser(@Model?.Id)">delete</button></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+</main>

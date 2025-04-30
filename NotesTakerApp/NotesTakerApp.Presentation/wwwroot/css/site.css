@@ -1,31 +1,90 @@
-html {
-  font-size: 14px;
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #f0e6d2; /* warmer beige */
+  border-right: 1px solid #d8cfc4;
+  height: 100vh;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateX(-250px); /* hidden by default */
+  transition: transform 0.3s ease;
+  z-index: 1050;
+  padding-top: 60px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+.sidebar.collapsed {
+  transform: translateX(-250px); /* hidden */
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.sidebar.expanded {
+  transform: translateX(0); /* visible */
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* Sidebar nav */
+.sidebar-nav {
+  list-style: none; /* remove bullet points */
+  padding: 0;
+  margin: 0;
 }
 
+.sidebar-nav li {
+  margin: 0;
+}
+
+.sidebar-nav a {
+  display: block;
+  padding: 12px 20px;
+  text-decoration: none; /* remove underline */
+  color: #6b4c3b; /* brown text */
+  font-weight: 500;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-nav a:hover {
+  background-color: #e5dac2;
+  box-shadow: inset 2px 0 5px rgba(0, 0, 0, 0.05);
+  color: #5a3e30;
+}
+
+/* Sidebar toggle button */
+#sidebarToggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1100;
+  background-color: #f0e6d2; /* same as sidebar */
+  color: #6b4c3b;
+  border: none;
+  padding: 8px 12px;
+  font-size: 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+#sidebarToggle:hover {
+  background-color: #d8ccb5;
+}
+
+/* Main content */
 body {
-  margin-bottom: 60px;
+  background-color: #f6f0e4; /* softer beige */
+  margin: 0;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.main-container {
+  background-color: #f6f0e4; /* match body */
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+  margin-left: 250px; /* move content when sidebar is shown */
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Adjust content when sidebar is collapsed */
+.sidebar.collapsed ~ .main-container {
+  margin-left: 0;
 }
