@@ -14,18 +14,15 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            var notes = noteService.GetAllNotesAsync();
-            return View(notes);
-        }
-        public IActionResult Index(string search)
+        public IActionResult Index(string? search)
         {
             var notes = noteService.GetAllNotesAsync();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                notes = (List<Note>)notes.Where(n => n.Title != null && n.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+                notes = notes
+                    .Where(n => n.Title != null && n.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
 
             return View(notes);
@@ -35,23 +32,15 @@ namespace NotesTakerApp.Presentation.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var note = await noteService.GetNoteByIdAsync(id);
+            if (note == null) return NotFound();
             return View(note);
         }
 
-        [HttpGet]
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Create a new note
         [HttpPost]
         public async Task<IActionResult> Create(string Title)
         {
-            if (string.IsNullOrEmpty(Title))
-            {
-                return RedirectToAction(nameof(Index)); // If no title, just return to the index
-            }
+            if (string.IsNullOrWhiteSpace(Title))
+                return RedirectToAction(nameof(Index));
 
             var newNote = new Note
             {
@@ -59,38 +48,45 @@ namespace NotesTakerApp.Presentation.Controllers
             };
 
             await noteService.PostNoteAsync(newNote);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, string content)
+        {
+            var note = await noteService.GetNoteByIdAsync(id);
+            if (note == null) return NotFound();
+
+            note.Content = content;
+            await noteService.RefreshNoteAsync(note);
 
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Update an existing note's content
+        // ✅ Support Delete via POST (to match JS)
         [HttpPost]
-        public async Task<IActionResult> Edit(int Id, string Content)
-        {
-            var note = await noteService.GetNoteByIdAsync(Id);
-            if (note == null)
-            {
-                return NotFound(); // If the note is not found
-            }
-
-            note.Content = Content;
-            await noteService.RefreshNoteAsync(note);
-
-            return RedirectToAction(nameof(Index)); // Redirect back to the index page
-        }
-
-        [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            var note = await noteService.GetNoteByIdAsync(id);
-            return View(note);
+            await noteService.DeleteNoteAsync(id);
+            return Ok(); // Return 200 for JS to confirm deletion
         }
 
-        [HttpDelete, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // ✅ Support EditTitle via POST (to match JS)
+        [HttpPost]
+        public async Task<IActionResult> EditTitle(int id, [FromBody] EditTitleModel model)
         {
-            await noteService.DeleteNoteAsync(id);
-            return RedirectToAction(nameof(Index)); // Redirect to the index page after deletion
+            var note = await noteService.GetNoteByIdAsync(id);
+            if (note == null) return NotFound();
+
+            note.Title = model.Title;
+            await noteService.RefreshNoteAsync(note);
+
+            return Ok();
+        }
+
+        public class EditTitleModel
+        {
+            public string Title { get; set; } = "";
         }
     }
 }
