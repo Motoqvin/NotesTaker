@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <!-- Sidebar -->
     <div id="sidebar" class="sidebar collapsed">
         <ul class="sidebar-nav">
             <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
@@ -21,7 +20,6 @@
         </ul>
     </div>
 
-    <!-- Navbar for Login/Logout or User info (aligned to the right) -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
@@ -48,7 +46,6 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="main-container">
         <button id="sidebarToggle" class="btn btn-outline-primary">☰</button>
 
@@ -57,15 +54,13 @@
         </main>
     </div>
 
-    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Sidebar Toggle Script -->
     <style>
     body {
-        background-color: #f6f0e4;; /* or your chosen background */
+        background-color: #f6f0e4;
         min-height: 100vh;
         margin: 0;
         font-family: 'Segoe UI', sans-serif;
@@ -99,7 +94,7 @@
                 updateToggleIcon();
             });
 
-            updateToggleIcon(); // Set correct icon on load
+            updateToggleIcon();
         });
     </script>
 
