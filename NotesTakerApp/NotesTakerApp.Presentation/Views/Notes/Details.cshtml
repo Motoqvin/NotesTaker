@@ -18,3 +18,38 @@
         <button type="submit" class="btn btn-primary mt-3 w-100">Save</button>
     </form>
 </div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+    <script>
+        const noteId = @Model.Id;
+        const contentBox = document.getElementById("content");
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notesHub")
+            .build();
+
+        connection.on("ReceiveNoteUpdate", function (content) {
+            if (document.activeElement !== contentBox) {
+                contentBox.value = content;
+            }
+        });
+
+        async function startConnection() {
+            try {
+                await connection.start();
+                await connection.invoke("JoinNoteGroup", noteId);
+            } catch (err) {
+                console.error(err.toString());
+                setTimeout(startConnection, 5000);
+            }
+        }
+
+        contentBox.addEventListener("input", () => {
+            connection.invoke("SendNoteUpdate", noteId, contentBox.value)
+                .catch(err => console.error(err.toString()));
+        });
+
+        startConnection();
+    </script>
+}

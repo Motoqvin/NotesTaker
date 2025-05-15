@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace NotesTakerApp.Core.Dtos;
-
-public class LoginDto
+public class RegisterDto
 {
+    public required string UserName { get; set; } = string.Empty;
+
     [EmailAddress]
     public required string Email { get; set; } = string.Empty;
 

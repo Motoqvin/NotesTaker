@@ -8,6 +8,7 @@ using NotesTakerApp.Core.Services;
 using NotesTakerApp.Infrastructure.Data;
 using NotesTakerApp.Infrastructure.Repositories;
 using NotesTakerApp.Infrastructure.Services;
+using NotesTakerApp.Presentation.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +81,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.MapHub<NotesHub>("/notesHub");
 app.UseAuthentication();
 app.UseAuthorization();
 

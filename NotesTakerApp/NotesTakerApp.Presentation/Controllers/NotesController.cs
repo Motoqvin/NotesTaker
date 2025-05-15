@@ -63,15 +63,13 @@ namespace NotesTakerApp.Presentation.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ Support Delete via POST (to match JS)
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             await noteService.DeleteNoteAsync(id);
-            return Ok(); // Return 200 for JS to confirm deletion
+            return Ok();
         }
 
-        // ✅ Support EditTitle via POST (to match JS)
         [HttpPost]
         public async Task<IActionResult> EditTitle(int id, [FromBody] EditTitleModel model)
         {

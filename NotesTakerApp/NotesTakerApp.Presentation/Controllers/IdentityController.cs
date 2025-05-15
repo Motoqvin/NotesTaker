@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NotesTakerApp.Core.Models;
+using NotesTakerApp.Core.Dtos;
 using System.Security.Claims;
-
+using NotesTakerApp.Core.Models;
+using NotesTakerApp.Core.ViewModel;
 namespace NotesTakerApp.Presentation.Controllers
 {
     public class IdentityController : Controller
@@ -27,15 +28,10 @@ namespace NotesTakerApp.Presentation.Controllers
         {
             var user = new UserViewModel()
             {
-                AllUsers = new List<User>()
-                {
-                    new User()
-                    {
-                        Email = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value!,
-                        UserName = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value!,
-                        Roles = User.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value).ToList()
-                    }
-                }
+                Email = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value!,
+                UserName = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Name)?.Value!,
+                Roles = User.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value).ToString() ?? "User",
+                Password = User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value!
             };
 
             return View(user);
@@ -52,7 +48,7 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromForm] UserViewModel model)
+        public async Task<IActionResult> Register([FromForm] RegisterDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -61,16 +57,14 @@ namespace NotesTakerApp.Presentation.Controllers
 
             var user = new User
             {
-                UserName = model.NewUser.UserName,
-                Email = model.NewUser.Email,
-                PasswordHash = model.NewUser.PasswordHash,
-                Roles = new List<string>()
+                UserName = model.UserName,
+                Email = model.Email
             };
 
-            var result = await userManager.CreateAsync(user, model.NewUser.PasswordHash);
+            var result = await userManager.CreateAsync(user, model.Password ?? string.Empty);
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("All", result.Errors.FirstOrDefault()?.Description);
+                ModelState.AddModelError("All", result.Errors.FirstOrDefault()?.Description ?? "User creation failed.");
                 return View(model);
             }
 
@@ -154,23 +148,23 @@ namespace NotesTakerApp.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(UserViewModel userModel)
+        public async Task<IActionResult> Login(LoginDto model)
         {
-            var foundUser = await userManager.FindByEmailAsync(userModel.NewUser.Email);
+            var foundUser = await userManager.FindByEmailAsync(model.Email);
             if (foundUser == null)
             {
                 ModelState.AddModelError("Email", "User not found.");
-                return View(userModel);
+                return View(model);
             }
 
-            var signInResult = await signInManager.PasswordSignInAsync(foundUser, userModel.NewUser.PasswordHash, true, true);
+            var signInResult = await signInManager.PasswordSignInAsync(foundUser, model.Password ?? "", true, true);
             if (signInResult.Succeeded)
             {
                 return RedirectToAction(nameof(Index), "Home");
             }
 
             ModelState.AddModelError("Password", "Invalid login attempt.");
-            return View(userModel);
+            return View(model);
         }
 
         [HttpGet]

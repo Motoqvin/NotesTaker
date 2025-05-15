@@ -1,4 +1,4 @@
-@using NotesTakerApp.Core.Models
+@using NotesTakerApp.Core.ViewModel
 @model UserViewModel
 
 @{
@@ -8,14 +8,14 @@
 <div>
 
     <p>
-        Name: @Model.NewUser.UserName
+        Name: @Model.UserName
     </p>
     <p>
-        Email: @Model.NewUser.Email
+        Email: @Model.Email
     </p>
     <p>Roles:</p>
     <ul>
-        @foreach (var role in Model.NewUser.Roles)
+        @foreach (var role in Model.Roles)
         {
             <li>
                 @role
