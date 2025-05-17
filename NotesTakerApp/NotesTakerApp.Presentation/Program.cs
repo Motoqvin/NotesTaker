@@ -33,6 +33,11 @@ builder.Services.AddIdentity<User, IdentityRole>(options => {})
 
 builder.Services.AddDataProtection();
 
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
+
 builder.Services.AddAuthentication(defaultScheme: CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(
         authenticationScheme: CookieAuthenticationDefaults.AuthenticationScheme,
