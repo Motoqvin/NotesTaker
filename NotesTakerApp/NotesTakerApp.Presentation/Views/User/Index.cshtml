@@ -1,4 +1,5 @@
-@model NotesTakerApp.Core.Models.UserViewModel
+@using NotesTakerApp.Core.Models
+@model NotesTakerApp.Core.ViewModel.UserViewModel
 
 @{
     ViewData["Title"] = "User Management";
@@ -10,21 +11,21 @@
 
 <form class="row g-3" method="post" asp-controller="User" asp-action="Create">
     <div class="mb-3">
-        <label asp-for="NewUser.UserName" class="form-label"></label>
-        <input asp-for="NewUser.UserName" class="form-control" />
-        <span asp-validation-for="NewUser.UserName" class="text-danger"></span>
+        <label asp-for="UserName" class="form-label"></label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="NewUser.Email" class="form-label"></label>
-        <input asp-for="NewUser.Email" class="form-control" />
-        <span asp-validation-for="NewUser.Email" class="text-danger"></span>
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="NewUser.PasswordHash" class="form-label"></label>
-        <input asp-for="NewUser.PasswordHash" type="password" class="form-control" />
-        <span asp-validation-for="NewUser.PasswordHash" class="text-danger"></span>
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-success">Create</button>
@@ -34,7 +35,7 @@
 
 <h2>All Users</h2>
 
-@if (Model.AllUsers == null || !Model.AllUsers.Any())
+@if (Model == null)
 {
     <p>No users found.</p>
 }
@@ -49,14 +50,10 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in Model.AllUsers)
-            {
-                <tr>
-                    <td>@user.Id</td>
-                    <td>@user.UserName</td>
-                    <td>@user.Email</td>
-                </tr>
-            }
+            <tr>
+                <td>@Model.UserName</td>
+                <td>@Model.Email</td>
+            </tr>
         </tbody>
     </table>
 }

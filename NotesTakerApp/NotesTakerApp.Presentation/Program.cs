@@ -8,6 +8,7 @@ using NotesTakerApp.Core.Services;
 using NotesTakerApp.Infrastructure.Data;
 using NotesTakerApp.Infrastructure.Repositories;
 using NotesTakerApp.Infrastructure.Services;
+using NotesTakerApp.Presentation.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,11 @@ builder.Services.AddIdentity<User, IdentityRole>(options => {})
     .AddEntityFrameworkStores<UsersIdentityDb>();
 
 builder.Services.AddDataProtection();
+
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 builder.Services.AddAuthentication(defaultScheme: CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(
@@ -80,6 +86,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.MapHub<NotesHub>("/notesHub");
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -15,7 +15,6 @@
         <ul class="sidebar-nav">
             <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
             <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
-            <li><a asp-area="" asp-controller="User" asp-action="Index">User</a></li>
             <li><a asp-area="" asp-controller="Notes" asp-action="Index">Notes</a></li>
         </ul>
     </div>
@@ -38,7 +37,7 @@
                 {
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="Index">@User.Identity.Name</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="Index">@User.Identity?.Name</a>
                         </li>
                     </ul>
                 }

@@ -1,8 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace NotesTakerApp.Core.Dtos;
 
 public class LoginDto
 {
-    public string? ReturnUrl { get; set; }
-    public required string Login { get; set; }
-    public required string Password { get; set; }
+    [EmailAddress]
+    public required string Email { get; set; } = string.Empty;
+
+    [DataType(DataType.Password)]
+    public required string Password { get; set; } = string.Empty;
 }

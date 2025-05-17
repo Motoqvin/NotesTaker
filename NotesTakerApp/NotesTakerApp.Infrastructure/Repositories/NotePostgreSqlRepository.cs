@@ -19,7 +19,7 @@ namespace NotesTakerApp.Infrastructure.Repositories
             var note = new Note
                 {
                     Title = title,
-                    Content = "", // <-- add at least an empty string
+                    Content = "",
                     CreatedAt = DateTime.UtcNow
                 };
 
