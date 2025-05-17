@@ -2,7 +2,7 @@ using Back.Models;
 using Back.Repositories.Base;
 using Back.Services.Base;
 
-namespace NotesTakerApp.Infrastructure.Services;
+namespace Back.Services;
 
 public class UserService : IUserService
 {

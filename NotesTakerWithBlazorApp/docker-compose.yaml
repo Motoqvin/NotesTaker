@@ -26,16 +26,18 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=Admin12345!
+    volumes:
+      - mssqlvolume:/var/opt/mssql
     networks:
       - bridgenetwork
     restart: always
 
-  app:
-    image: app_image
+  webapi:
+    image: webapi_image
     build:
       context: .
-      dockerfile: app.Dockerfile
-    container_name: app_container
+      dockerfile: webapi.Dockerfile
+    container_name: webapi_container
     expose:
       - 4000
     ports:
@@ -46,6 +48,7 @@ services:
       - bridgenetwork
     depends_on:
       - postgres
+      - mssql
     restart: always
 
 networks:
@@ -54,3 +57,4 @@ networks:
 
 volumes:
   postgresvolume:
+  mssqlvolume:
