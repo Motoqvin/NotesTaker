@@ -1,5 +1,6 @@
 ﻿@{
     bool isAuthenticated = base.User.Identity?.IsAuthenticated ?? false;
+    bool isAuthenticatedAdmin = base.User.IsInRole("Admin");
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -19,6 +20,10 @@
             <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
             <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
             <li><a asp-area="" asp-controller="Notes" asp-action="Index">Notes</a></li>
+            @if (isAuthenticatedAdmin)
+            {
+                <li><a asp-area="" asp-controller="Admin" asp-action="Index">Admin</a></li>
+            }
         </ul>
     </div>
 

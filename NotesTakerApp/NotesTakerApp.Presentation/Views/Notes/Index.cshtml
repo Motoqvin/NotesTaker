@@ -19,7 +19,7 @@
             <li class="mb-3 text-center">
                 <div style="
                     display: inline-block;
-                    width: 300px;
+                    width: 500px;
                     padding: 16px 20px;
                     background-color: #fffff0;
                     border-radius: 8px;
@@ -85,12 +85,11 @@
             // EDIT
             document.querySelectorAll(".edit-icon").forEach(icon => {
                 icon.addEventListener("click", (e) => {
-                    e.stopPropagation(); // Prevent triggering Details navigation
+                    e.stopPropagation();
                     const noteDiv = icon.closest("div[data-note-id]");
                     const noteId = noteDiv.getAttribute("data-note-id");
                     const titleElem = noteDiv.querySelector(".note-title");
 
-                    // Avoid adding multiple inputs
                     if (noteDiv.querySelector("input.edit-title-input")) return;
 
                     const oldTitle = titleElem.textContent;
@@ -110,7 +109,6 @@
                     titleElem.replaceWith(input);
                     input.focus();
 
-                    // On blur, save or revert
                     input.addEventListener("blur", async () => {
                         const newTitle = input.value.trim();
 

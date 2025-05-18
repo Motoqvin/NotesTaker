@@ -1,5 +1,5 @@
-@using NotesTakerApp.Core.ViewModel
-@model UserViewModel
+@using NotesTakerApp.Core.Models
+@model User
 
 @{
     ViewData["Title"] = "Index";
@@ -24,6 +24,7 @@
     </ul>
 
     <form asp-controller="Account" asp-action="Logout" method="get">
+    using NotesTakerApp.Core.Models;
         <button type="submit" class="btn btn-danger">Logout</button>
     </form>
 </div>
