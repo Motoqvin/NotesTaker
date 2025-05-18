@@ -8,9 +8,18 @@
         Your personal space to capture, organize, and manage all your notes effortlessly.
     </p>
 
-    <div class="mt-4">
-        <a class="btn btn-primary btn-lg me-2" href="/Identity/Register">Get Started</a>
-        <a class="btn btn-outline-secondary btn-lg" href="/Identity/Login">Login</a>
-    </div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <p class="mt-4">
+            <a class="btn btn-primary btn-lg" href="/Notes">Go to Notes</a>
+        </p>
+    }
+    else
+    {
+        <p class="mt-4">
+            <a class="btn btn-primary btn-lg" href="/Identity/Login">Login</a>
+            <a class="btn btn-outline-secondary btn-lg" href="/Identity/Register">Register</a>
+        </p>
+    }
 </div>
 

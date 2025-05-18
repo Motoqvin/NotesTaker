@@ -10,17 +10,14 @@ using NotesTakerApp.Presentation.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Services ---
 builder.Services.AddControllersWithViews();
 
-// Database (single source of truth)
 builder.Services.AddDbContext<UsersIdentityDb>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("NotesTakerAppSqlServerContext");
     options.UseSqlServer(connectionString);
 });
 
-// Identity
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.Password.RequireNonAlphanumeric = false;
@@ -29,16 +26,13 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 .AddEntityFrameworkStores<UsersIdentityDb>()
 .AddDefaultTokenProviders();
 
-// Repositories (using IdentityDb only)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<INoteRepository, NoteSqlRepository>(); // If still using PostgreSQL for notes
 
 
 
-// Email (placeholder)
 builder.Services.AddScoped<EmailSender>();
 
-// Authentication and Authorization
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -54,13 +48,10 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-// SignalR
 builder.Services.AddSignalR(options => options.EnableDetailedErrors = true);
 
-// --- App Pipeline ---
 var app = builder.Build();
 
-// Seed roles
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();

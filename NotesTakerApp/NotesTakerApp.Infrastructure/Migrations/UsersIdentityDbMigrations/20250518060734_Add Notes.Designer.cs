@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NotesTakerApp.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using NotesTakerApp.Infrastructure.Data;
 namespace NotesTakerApp.Infrastructure.Migrations.UsersIdentityDbMigrations
 {
     [DbContext(typeof(UsersIdentityDb))]
-    partial class UsersIdentityDbModelSnapshot : ModelSnapshot
+    [Migration("20250518060734_Add Notes")]
+    partial class AddNotes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

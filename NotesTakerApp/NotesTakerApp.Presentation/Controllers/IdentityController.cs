@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
+using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Core.ViewModel;
 using System.Threading.Tasks;
 
@@ -11,11 +12,20 @@ namespace NotesTakerApp.Presentation.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IUserRepository _userRepository;
 
-        public IdentityController(UserManager<User> userManager, SignInManager<User> signInManager)
+        public IdentityController(UserManager<User> userManager, SignInManager<User> signInManager, IUserRepository userRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _userRepository = userRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var id = User.Claims.FirstOrDefault(c => c.Type == "NameIdentifier");
+            var user = await _userRepository.GetUserByIdAsync(id.Value);
+            return View(user);
         }
 
         [HttpGet]
@@ -27,12 +37,13 @@ namespace NotesTakerApp.Presentation.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            System.Console.WriteLine("Registering user...");
             if (!ModelState.IsValid)
                 return View(model);
-
+            System.Console.WriteLine("ModelState is valid");
             var user = new User
             {
-                UserName = model.UserName,
+                UserName = model.Username,
                 Email = model.Email
             };
 
@@ -64,7 +75,7 @@ namespace NotesTakerApp.Presentation.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, true, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
