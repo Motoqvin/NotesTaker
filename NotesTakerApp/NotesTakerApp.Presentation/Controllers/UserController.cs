@@ -1,4 +1,3 @@
-// Updated UserController using UserRepository directly
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Repositories;
-using NotesTakerApp.Core.Services;
 
 namespace NotesTakerApp.Presentation.Controllers;
 

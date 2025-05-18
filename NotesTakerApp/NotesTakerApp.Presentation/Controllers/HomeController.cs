@@ -1,8 +1,6 @@
 using System.Diagnostics;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NotesTakerApp.Core.Models;
 using NotesTakerApp.Presentation.Models;
 
 namespace NotesTakerApp.Presentation.Controllers;
