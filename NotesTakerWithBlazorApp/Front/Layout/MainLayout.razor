@@ -1,16 +1,84 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div id="sidebar" class="sidebar collapsed">
+    <ul class="sidebar-nav">
+        <li><NavLink href="" Match="NavLinkMatch.All">Home</NavLink></li>
+        <li><NavLink href="privacy">Privacy</NavLink></li>
+        <li><NavLink href="notes">Notes</NavLink></li>
+    </ul>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <div class="collapse navbar-collapse">
+            <AuthorizeView>
+                <Authorized>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <NavLink class="nav-link text-dark" href="identity">@context.User.Identity?.Name</NavLink>
+                        </li>
+                    </ul>
+                </Authorized>
+                <NotAuthorized>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <NavLink class="nav-link text-dark" href="identity/login">Login</NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <NavLink class="nav-link text-dark" href="identity/register">Registration</NavLink>
+                        </li>
+                    </ul>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
+    </div>
+</nav>
 
-        <article class="content px-4">
-            @Body
-        </article>
+<div class="main-container">
+    <button id="sidebarToggle" class="btn btn-outline-primary">☰</button>
+
+    <main role="main" class="pb-3">
+        @Body
     </main>
 </div>
+
+<style>
+    body {
+        background-color: #f6f0e4;
+        min-height: 100vh;
+        margin: 0;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .auth-container {
+        background-color: #f6f0e4;
+        padding: 2rem;
+        max-width: 450px;
+        margin: 3rem auto;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .main-container {
+        padding: 20px;
+    }
+</style>
+
+@code
+ 
+{
+
+    
+protected override async Task OnAfterRenderAsync (bool firstRender)
+{
+
+        
+if (firstRender){
+    await JSRuntime.InvokeVoidAsync("setupSidebar");
+
+}
+
+    
+}
+
+}

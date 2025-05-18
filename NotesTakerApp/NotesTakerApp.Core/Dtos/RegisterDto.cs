@@ -1,13 +1,23 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace NotesTakerApp.Core.Dtos;
-public class RegisterDto
+namespace NotesTakerApp.Core.Dtos
 {
-    public required string UserName { get; set; }
+    public class RegisterDto
+    {
+        [Required(ErrorMessage = "Username is required.")]
+        [RegularExpression(@"^[\w.-]{3,20}$", 
+            ErrorMessage = "3-20 characters. Allowed: letters, digits, . _ -")]
+        [Display(Name = "Username")]
+        public string UserName { get; set; } = string.Empty;
 
-    [EmailAddress]
-    public required string Email { get; set; }
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        public string Email { get; set; } = string.Empty;
 
-    [DataType(DataType.Password)]
-    public required string Password { get; set; }
+        [Required(ErrorMessage = "Password is required.")]
+        [DataType(DataType.Password)]
+        [StringLength(100, MinimumLength = 6, 
+            ErrorMessage = "6-100 characters required.")]
+        public string Password { get; set; } = string.Empty;
+    }
 }

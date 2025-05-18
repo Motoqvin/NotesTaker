@@ -1,0 +1,55 @@
+@page "/identity/login"
+@using NotesTakerApp.Core.Dtos
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
+
+<div class="auth-container">
+    <h2 class="mb-4">Login</h2>
+
+    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <InputText id="email" @bind-Value="loginModel.Email" class="form-control" />
+            <ValidationMessage For="@(() => loginModel.Email)" class="text-danger" />
+        </div>
+        
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <InputText id="password" type="password" @bind-Value="loginModel.Password" class="form-control" />
+            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </EditForm>
+</div>
+
+@code {
+    [Inject]
+    public PageTitle PageTitle { get; set; }
+    
+    private LoginDto loginModel = new LoginDto();
+    private string error;
+    
+    protected override void OnInitialized()
+    {
+        PageTitle.Title = "Login";
+    }
+    
+    private async Task HandleLogin()
+    {
+        try
+        {
+            
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            await JSRuntime.InvokeVoidAsync("alert", "Login failed: " + error);
+        }
+    }
+}

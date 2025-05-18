@@ -1,0 +1,220 @@
+@page "/notes"
+@using NotesTakerApp.Core.Models
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<h3 class="text-center mt-5">Welcome to Notes</h3>
+
+<EditForm Model="@newNote" OnValidSubmit="HandleCreateNote" class="text-center mt-3">
+    <InputText @bind-Value="newNote.Title" placeholder="New note title..." class="form-control" required style="max-width: 300px; margin: 10px auto;" />
+    <button type="submit" class="btn btn-success w-100 mt-2" style="max-width: 300px; margin: 10px auto;">+ Add Note</button>
+</EditForm>
+
+<h5 class="text-center text-muted mb-3 mt-4">ALL NOTES</h5>
+
+@if (loading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (notes?.Any() != true)
+{
+    <p class="text-center text-muted">No notes found. Create your first note above!</p>
+}
+else
+{
+    <ul class="list-unstyled m-0 p-0">
+        @foreach (var note in notes)
+        {
+            <li class="mb-3 text-center">
+                <div @onclick="() => NavigateToDetails(note.Id)" style="
+                    display: inline-block;
+                    width: 300px;
+                    padding: 16px 20px;
+                    background-color: #fffff0;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+                    font-size: 1rem;
+                    text-align: left;
+                    position: relative;
+                    cursor: pointer;"
+                     @key="note.Id">
+
+                    @if (editingNoteId == note.Id)
+                    {
+                        <input @bind="editTitle"
+                               @bind:event="oninput"
+                               @onblur="HandleTitleUpdate"
+                               @onkeydown="HandleTitleKeyPress"
+                               class="form-control edit-title-input"
+                               style="font-size: 1.1rem; margin-bottom: 6px; border-radius: 6px; padding: 6px 10px; box-shadow: none; border: 1px solid #ccc;"
+                               @ref="titleInputReference" />
+                    }
+                    else
+                    {
+                        <strong class="note-title" style="display: block; margin-bottom: 6px; font-size: 1.1rem;">
+                            @(string.IsNullOrEmpty(note.Title) ? "Untitled" : note.Title)
+                        </strong>
+                    }
+
+                    <small style="color: #666;">Created @note.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+
+                    <div style="position: absolute; top: 10px; right: 10px;">
+                        <i class="bi bi-pencil edit-icon" title="Edit"
+                           style="margin-right: 10px; color: #0d6efd; cursor: pointer;"
+                           @onclick:stopPropagation="true"
+                           @onclick="() => StartEditTitle(note)"></i>
+                        <i class="bi bi-trash delete-icon" title="Delete"
+                           style="color: #dc3545; cursor: pointer;"
+                           @onclick:stopPropagation="true"
+                           @onclick="() => DeleteNote(note.Id)"></i>
+                    </div>
+                </div>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    [Inject]
+    public PageTitle PageTitle { get; set; }
+
+    private List<Note> notes;
+    private bool loading = true;
+    private NewNoteModel newNote = new NewNoteModel();
+    private int? editingNoteId;
+    private string editTitle;
+    private ElementReference titleInputReference;
+
+    protected override async Task OnInitializedAsync()
+    {
+        PageTitle.Title = "Notes";
+        await LoadNotes();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (editingNoteId.HasValue && titleInputReference.Id != null)
+        {
+            await JSRuntime.InvokeVoidAsync("focusElement", titleInputReference);
+        }
+    }
+
+    private async Task LoadNotes()
+    {
+        loading = true;
+
+        try
+        {
+            // Simulated data
+            notes = new List<Note>
+            {
+                new Note { Id = 1, Title = "Shopping List", Content = "Eggs, Milk, Bread", CreatedAt = DateTime.Now.AddDays(-2) },
+                new Note { Id = 2, Title = "Meeting Notes", Content = "Discuss project timeline", CreatedAt = DateTime.Now.AddDays(-1) }
+            };
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Failed to load notes: " + ex.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task HandleCreateNote()
+    {
+        if (string.IsNullOrWhiteSpace(newNote.Title))
+            return;
+
+        try
+        {
+            var createdNote = new Note
+            {
+                Id = notes.Count + 1,
+                Title = newNote.Title,
+                Content = "",
+                CreatedAt = DateTime.Now
+            };
+
+            notes.Add(createdNote);
+            newNote.Title = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Failed to create note: " + ex.Message);
+        }
+    }
+
+    private void NavigateToDetails(int noteId)
+    {
+        NavigationManager.NavigateTo($"/notes/{noteId}");
+    }
+
+    private void StartEditTitle(Note note)
+    {
+        editingNoteId = note.Id;
+        editTitle = note.Title;
+        StateHasChanged();
+    }
+
+    private async Task HandleTitleUpdate()
+    {
+        if (editingNoteId.HasValue && !string.IsNullOrWhiteSpace(editTitle))
+        {
+            var note = notes.FirstOrDefault(n => n.Id == editingNoteId.Value);
+            if (note != null && note.Title != editTitle)
+            {
+                try
+                {
+                    note.Title = editTitle;
+                }
+                catch (Exception ex)
+                {
+                    await JSRuntime.InvokeVoidAsync("alert", "Failed to update title: " + ex.Message);
+                }
+            }
+        }
+
+        editingNoteId = null;
+    }
+
+    private async Task DeleteNote(int noteId)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this note?");
+
+        if (confirmed)
+        {
+            try
+            {
+                notes.RemoveAll(n => n.Id == noteId);
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to delete note: " + ex.Message);
+            }
+        }
+    }
+
+    private async Task HandleTitleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await HandleTitleUpdate();
+        }
+        else if (e.Key == "Escape")
+        {
+            editingNoteId = null;
+        }
+    }
+
+    public class NewNoteModel
+    {
+        public string Title { get; set; }
+    }
+}

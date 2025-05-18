@@ -1,0 +1,187 @@
+@page "/notes/{Id:int}"
+@using NotesTakerApp.Core.Models
+@using Microsoft.AspNetCore.SignalR.Client
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+@attribute [Authorize]
+
+<h3 class="text-center mt-4">@(note?.Title ?? "Loading...")</h3>
+
+@if (loading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (note == null)
+{
+    <div class="text-center">
+        <p class="text-danger">Note not found.</p>
+        <button class="btn btn-primary" @onclick="NavigateToNotes">Back to Notes</button>
+    </div>
+}
+else
+{
+    <div class="container mt-4" style="max-width: 600px;">
+        <EditForm Model="@note" OnValidSubmit="HandleSave">
+            <div class="form-group">
+                <label for="content">Content</label>
+                <InputTextArea class="form-control"
+                               @bind-Value="note.Content"
+                               id="content"
+                               rows="10"
+                               @oninput="HandleContentChange" />
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3 w-100">Save</button>
+        </EditForm>
+
+        @if (saveStatus != null)
+        {
+            <div class="alert @(saveStatus.Success ? "alert-success" : "alert-danger") mt-3">
+                @saveStatus.Message
+            </div>
+        }
+    </div>
+}
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Inject]
+    public PageTitle PageTitle { get; set; }
+
+    private Note note;
+    private bool loading = true;
+    private HubConnection hubConnection;
+    private SaveStatus saveStatus;
+    private Timer debounceTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+
+        try
+        {
+            // In a real app, you'd use a service
+            // note = await NotesService.GetNoteById(Id);
+            
+            // Demo data
+            note = new Note
+            {
+                Id = Id,
+                Title = $"Note {Id}",
+                Content = "This is the content of your note. Edit it here.",
+                CreatedAt = DateTime.Now.AddDays(-1)
+            };
+
+            PageTitle.Title = note.Title;
+            
+            await SetupSignalRConnection();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Error loading note: " + ex.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task SetupSignalRConnection()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/notesHub"))
+            .WithAutomaticReconnect()
+            .Build();
+
+        hubConnection.On<string>("ReceiveNoteUpdate", content =>
+        {
+            // Only update if not currently editing
+            bool isActiveElement = false;
+            try {
+                isActiveElement = JSRuntime.InvokeAsync<bool>("isContentBoxActive").Result;
+            } catch {}
+
+            if (!isActiveElement && note != null)
+            {
+                note.Content = content;
+                StateHasChanged();
+            }
+        });
+
+        try
+        {
+            await hubConnection.StartAsync();
+            await hubConnection.InvokeAsync("JoinNoteGroup", Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error starting SignalR connection: {ex.Message}");
+        }
+    }
+
+    private async Task HandleContentChange(ChangeEventArgs e)
+    {
+        if (hubConnection?.State == HubConnectionState.Connected)
+        {
+            // Set up debounce to avoid too many messages
+            debounceTimer?.Dispose();
+            debounceTimer = new Timer(async _ =>
+            {
+                await InvokeAsync(async () =>
+                {
+                    try
+                    {
+                        await hubConnection.InvokeAsync("SendNoteUpdate", Id, e.Value?.ToString() ?? "");
+                    }
+                    catch { }
+                });
+            }, null, 300, Timeout.Infinite);
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        try
+        {
+            // In a real app, you'd use a service
+            // await NotesService.UpdateNote(note);
+            
+            saveStatus = new SaveStatus { Success = true, Message = "Note saved successfully!" };
+            
+            // Hide the message after 3 seconds
+            await Task.Delay(3000);
+            saveStatus = null;
+        }
+        catch (Exception ex)
+        {
+            saveStatus = new SaveStatus { Success = false, Message = $"Error: {ex.Message}" };
+        }
+    }
+
+    private void NavigateToNotes()
+    {
+        NavigationManager.NavigateTo("/notes");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        debounceTimer?.Dispose();
+        
+        if (hubConnection != null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+
+    private class SaveStatus
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+    }
+}

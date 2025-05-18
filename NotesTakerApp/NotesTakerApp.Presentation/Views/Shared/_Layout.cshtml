@@ -9,6 +9,9 @@
     <title>@ViewData["Title"] - NotesTakerApp.Presentation</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
 </head>
 <body>
     <div id="sidebar" class="sidebar collapsed">
@@ -19,7 +22,7 @@
         </ul>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #f6f0e4">
         <div class="container-fluid">
             <div class="collapse navbar-collapse">
                 @if (isAuthenticated == false)
