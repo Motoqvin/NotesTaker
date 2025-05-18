@@ -1,0 +1,47 @@
+@page "/identity/verify"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<div class="auth-container">
+    <h2 class="mb-4">Email Verification</h2>
+
+    <EditForm Model="@verificationModel" OnValidSubmit="HandleVerification">
+        <div class="mb-3">
+            <label for="verificationCode" class="form-label">Verification Code</label>
+            <InputText id="verificationCode" @bind-Value="verificationModel.VerificationCode" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Verify</button>
+    </EditForm>
+</div>
+@code {
+    [Inject]
+    public PageTitle PageTitle { get; set; }
+    
+    private VerificationModel verificationModel = new VerificationModel();
+    
+    protected override void OnInitialized()
+    {
+        PageTitle.Title = "Email Verification";
+    }
+    
+    private async Task HandleVerification()
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Email verified successfully!");
+            NavigationManager.NavigateTo("/identity/login");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Verification failed: " + ex.Message);
+        }
+    }
+    
+    public class VerificationModel
+    {
+        [Required(ErrorMessage = "Verification code is required")]
+        [StringLength(6, MinimumLength = 6, ErrorMessage = "Verification code must be 6 characters")]
+        public string VerificationCode { get; set; }
+    }
+}

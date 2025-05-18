@@ -4,74 +4,74 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Repositories;
-using NotesTakerApp.Core.Services;
 using NotesTakerApp.Infrastructure.Data;
 using NotesTakerApp.Infrastructure.Repositories;
-using NotesTakerApp.Infrastructure.Services;
 using NotesTakerApp.Presentation.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --- Services ---
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<UserSqlServerDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("NotesTakerAppSqlServerContext")));
-builder.Services.AddDbContext<NotePostgresDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("NotesTakerAppPostgreSqlServerContext")));
-builder.Services.AddScoped<IHttpLogRepository, HttpLogMsSqlRepository>();
-builder.Services.AddScoped<IUserRepository, UserMSSqlRepository>();
-builder.Services.AddScoped<INoteRepository, NotePostgreSqlRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<INoteService, NoteService>();
+
+// Database (single source of truth)
 builder.Services.AddDbContext<UsersIdentityDb>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("NotesTakerAppSqlServerContext");
     options.UseSqlServer(connectionString);
 });
-builder.Services.AddScoped<EmailSender>();
-builder.Services.AddIdentity<User, IdentityRole>(options => {})
-    .AddEntityFrameworkStores<UsersIdentityDb>();
 
-builder.Services.AddDataProtection();
-
-builder.Services.AddSignalR(options =>
+// Identity
+builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
-    options.EnableDetailedErrors = true;
-});
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+})
+.AddEntityFrameworkStores<UsersIdentityDb>()
+.AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(defaultScheme: CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(
-        authenticationScheme: CookieAuthenticationDefaults.AuthenticationScheme,
-        configureOptions: options =>
-        {
-            options.LoginPath = "/Identity/Login";
-        });
+// Repositories (using IdentityDb only)
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<INoteRepository, NoteSqlRepository>(); // If still using PostgreSQL for notes
+
+
+
+// Email (placeholder)
+builder.Services.AddScoped<EmailSender>();
+
+// Authentication and Authorization
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Identity/Login";
+    });
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("MyPolicy", policy =>
     {
-        policy.RequireRole("Admin")
-            .RequireClaim(ClaimTypes.Name, "Admin")
-            .RequireRole("User");
+        policy.RequireRole("Admin", "User");
+        policy.RequireClaim(ClaimTypes.Name);
     });
 });
 
+// SignalR
+builder.Services.AddSignalR(options => options.EnableDetailedErrors = true);
+
+// --- App Pipeline ---
 var app = builder.Build();
 
+// Seed roles
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    var adminRole = await roleManager.FindByNameAsync("Admin");
-    if (adminRole == null)
+    string[] roles = ["Admin", "User"];
+    foreach (var role in roles)
     {
-        await roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
-    }
-
-    var userRole = await roleManager.FindByNameAsync("User");
-    if (userRole == null)
-    {
-        await roleManager.CreateAsync(new IdentityRole { Name = "User" });
+        if (await roleManager.FindByNameAsync(role) == null)
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
     }
 }
 
@@ -86,9 +86,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.MapHub<NotesHub>("/notesHub");
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<NotesHub>("/notesHub");
 
 app.MapControllerRoute(
     name: "default",

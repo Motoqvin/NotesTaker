@@ -1,0 +1,30 @@
+@page "/"
+
+<div class="text-center mt-5">
+    <h1 class="display-4">Welcome to Notes Taker 📝</h1>
+    <p class="lead mt-3">
+        Your personal space to capture, organize, and manage all your notes effortlessly.
+    </p>
+
+    <div class="mt-4">
+        <a class="btn btn-primary btn-lg me-2" href="identity/register">Get Started</a>
+        <a class="btn btn-outline-secondary btn-lg" href="identity/login">Login</a>
+    </div>
+</div>
+
+@code
+{
+
+    
+[Inject]
+public PageTitle PageTitle {get;set;}
+
+
+    
+protected override void OnInitialized()
+{
+
+PageTitle.Title = "Welcome to Notes Taker";
+}
+
+}

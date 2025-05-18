@@ -1,44 +1,49 @@
+// Updated UserController using UserRepository directly
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
-using NotesTakerApp.Core.Services;
-using NotesTakerApp.Core.ViewModel;
+using NotesTakerApp.Core.Repositories;
 
 namespace NotesTakerApp.Presentation.Controllers
 {
     public class UserController : Controller
     {
-        private readonly IUserService userService;
+        private readonly IUserRepository _userRepository;
 
-        public UserController(IUserService userService)
+        public UserController(IUserRepository userRepository)
         {
-            this.userService = userService;
+            _userRepository = userRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var users = await userService.GetAllUsersAsync();
+            var users = _userRepository.GetAllUsersAsync();
             return View(users);
         }
 
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Create(User user)
+        public async Task<IActionResult> Create(User user, string password)
         {
             if (ModelState.IsValid)
             {
-                await userService.AddUserAsync(user);
+                await _userRepository.CreateUserAsync(user, password);
                 return RedirectToAction(nameof(Index));
             }
 
-            var allUsers = await userService.GetAllUsersAsync();
-            return View("Index", allUsers);
+            return View(user);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Edit(int id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
         {
-            var user = await userService.GetUserByIdAsync(id);
+            var user = await _userRepository.GetUserByIdAsync(id);
             return View(user);
         }
 
@@ -47,25 +52,26 @@ namespace NotesTakerApp.Presentation.Controllers
         {
             if (ModelState.IsValid)
             {
-                await userService.UpdateUserAsync(user);
+                await _userRepository.UpdateUserAsync(user);
                 return RedirectToAction(nameof(Index));
             }
+
             return View(user);
         }
 
-        [HttpDelete]
+        [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
-            var user = await userService.GetUserByIdAsync(id);
+            var user = await _userRepository.GetUserByIdAsync(id);
             return View(user);
         }
 
         [HttpPost, ActionName("Delete")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            await userService.DeleteUserAsync(id);
+            await _userRepository.DeleteUserAsync(id);
             return RedirectToAction(nameof(Index));
         }
     }

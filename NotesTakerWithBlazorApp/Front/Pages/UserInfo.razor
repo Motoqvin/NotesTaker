@@ -1,0 +1,66 @@
+@page "/identity"
+@using NotesTakerApp.Core.ViewModel
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<div class="mt-4 p-4 bg-white rounded shadow">
+    <h2>Account Information</h2>
+
+    @if (userViewModel != null)
+    {
+        <div class="mt-4">
+            <p>
+                <strong>Name:</strong> @userViewModel.UserName
+            </p>
+            <p>
+                <strong>Email:</strong> @userViewModel.Email
+            </p>
+            
+            @if (userViewModel.Roles?.Any() == true)
+            {
+                <p><strong>Roles:</strong></p>
+                <ul>
+                    @foreach (var role in userViewModel.Roles)
+                    {
+                        <li>@role</li>
+                    }
+                </ul>
+            }
+            
+            <button class="btn btn-danger" @onclick="HandleLogout">Logout</button>
+        </div>
+    }
+    else
+    {
+        <p>Loading user information...</p>
+    }
+</div>
+
+@code {
+    [Inject]
+    public PageTitle PageTitle { get; set; }
+    
+    private UserViewModel userViewModel;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        PageTitle.Title = "Profile";
+        
+        // In a real app, you'd use a service here
+        // userViewModel = await UserService.GetCurrentUserProfile();
+        
+        // For demo purposes
+        userViewModel = new UserViewModel
+        {
+            UserName = "Demo User",
+            Email = "demo@example.com",
+            Roles = new List<string> { "User" }
+        };
+    }
+    
+    private async Task HandleLogout()
+    {
+        
+        NavigationManager.NavigateTo("/");
+    }
+}

@@ -4,7 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using NotesTakerApp.Core.Models;
 
 namespace NotesTakerApp.Infrastructure.Data;
+
 public class UsersIdentityDb : IdentityDbContext<User, IdentityRole, string>
 {
-    public UsersIdentityDb(DbContextOptions<UsersIdentityDb> options) : base(options) { }
+    public DbSet<Note> Notes { get; set; }
+    public UsersIdentityDb(DbContextOptions<UsersIdentityDb> options) : base(options)
+    { }
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<Note>()
+            .HasOne(n => n.User)
+            .WithMany(u => u.Notes)
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
 }

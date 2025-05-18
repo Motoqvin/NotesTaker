@@ -1,0 +1,97 @@
+@page "/identity/register"
+@using NotesTakerApp.Core.Dtos
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<div class="auth-container">
+    <h2 class="mb-4">Register</h2>
+
+    <EditForm Model="@registerModel" OnValidSubmit="HandleRegistration">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <InputText id="username" @bind-Value="registerModel.UserName" class="form-control" />
+            <ValidationMessage For="@(() => registerModel.UserName)" class="text-danger" />
+        </div>
+        
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <InputText id="email" @bind-Value="registerModel.Email" class="form-control" />
+            <ValidationMessage For="@(() => registerModel.Email)" class="text-danger" />
+        </div>
+        
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <InputText id="password" type="password" @bind-Value="registerModel.Password" class="form-control" />
+            <ValidationMessage For="@(() => registerModel.Password)" class="text-danger" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </EditForm>
+</div>
+
+@page "/identity/register"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h1>Register</h1>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger">
+        @error
+    </div>
+}
+
+<EditForm Model="@registerModel" OnValidSubmit="HandleRegistration">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="registerModel.Email" />
+        <ValidationMessage For="@(() => registerModel.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="registerModel.Password" />
+        <ValidationMessage For="@(() => registerModel.Password)" />
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="registerModel.ConfirmPassword" />
+        <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@code {
+    [Inject]
+    public PageTitle PageTitle { get; set; }
+
+    private RegisterDto registerModel = new RegisterDto();
+    private string error;
+
+    protected override void OnInitialized()
+    {
+        PageTitle.Title = "Register";
+    }
+
+    private async Task HandleRegistration()
+    {
+        try
+        {
+            NavigationManager.NavigateTo("/identity/verify");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            await JSRuntime.InvokeVoidAsync("alert", "Registration failed: " + error);
+        }
+    }
+}
