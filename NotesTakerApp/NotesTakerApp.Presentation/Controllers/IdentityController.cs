@@ -1,9 +1,9 @@
-// IdentityController with Registration and Login using Identity
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Core.ViewModel;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace NotesTakerApp.Presentation.Controllers
@@ -23,7 +23,7 @@ namespace NotesTakerApp.Presentation.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var id = User.Claims.FirstOrDefault(c => c.Type == "NameIdentifier");
+            var id = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             var user = await _userRepository.GetUserByIdAsync(id.Value);
             return View(user);
         }
@@ -74,12 +74,18 @@ namespace NotesTakerApp.Presentation.Controllers
         {
             if (!ModelState.IsValid)
                 return View(model);
+            System.Console.WriteLine("ModelState is valid");
 
             var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, true, lockoutOnFailure: false);
-
+            System.Console.WriteLine("Login result: " + result);
             if (result.Succeeded)
             {
                 return RedirectToAction("Index", "Notes");
+            }
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(string.Empty, "User is locked out.");
+                return View(model);
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");

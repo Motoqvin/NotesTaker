@@ -4,7 +4,6 @@
     ViewData["Title"] = "Note Details";
 }
 
-<!-- Quill Styles -->
 <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
 <style>
@@ -70,7 +69,6 @@
     </form>
 </div>
 
-<!-- Quill JS -->
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
 
@@ -91,38 +89,58 @@
         }
     });
 
-    // On form submit: place editor content in hidden input
+    let lastSentContent = quill.root.innerHTML;
+
     function syncContent() {
-        const content = document.querySelector('#hiddenContent');
-        content.value = quill.root.innerHTML;
+        document.querySelector('#hiddenContent').value = quill.root.innerHTML;
     }
 
-    // SignalR real-time updates
     const connection = new signalR.HubConnectionBuilder()
         .withUrl("/notesHub")
         .build();
 
     connection.on("ReceiveNoteUpdate", function (content) {
-        if (document.activeElement !== quill.root) {
+        if (quill.root.innerHTML !== content) {
+            lastSentContent = content;
+            const selection = quill.getSelection();
             quill.root.innerHTML = content;
+            if (selection) {
+                quill.setSelection(selection.index, selection.length);
+            }
         }
     });
+
+    quill.on('text-change', () => {
+        const currentContent = quill.root.innerHTML;
+        if (currentContent !== lastSentContent) {
+            lastSentContent = currentContent;
+            connection.invoke("SendNoteUpdate", noteId, currentContent)
+                .catch(err => console.error(err.toString()));
+        }
+    });
+
+    let debounceTimer;
+quill.on('text-change', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        const content = quill.root.innerHTML;
+        if (content !== lastSentContent) {
+            lastSentContent = content;
+            connection.invoke("SendNoteUpdate", noteId, content)
+                .catch(err => console.error(err.toString()));
+        }
+    }, 400);
+});
 
     async function startConnection() {
         try {
             await connection.start();
             await connection.invoke("JoinNoteGroup", noteId);
         } catch (err) {
-            console.error(err.toString());
-            setTimeout(startConnection, 5000);
+            console.error("Connection failed: ", err);
+            setTimeout(startConnection, 3000);
         }
     }
-
-    quill.on('text-change', () => {
-        const content = quill.root.innerHTML;
-        connection.invoke("SendNoteUpdate", noteId, content)
-            .catch(err => console.error(err.toString()));
-    });
 
     startConnection();
 </script>
