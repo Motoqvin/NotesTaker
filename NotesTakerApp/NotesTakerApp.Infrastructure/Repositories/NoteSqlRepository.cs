@@ -28,7 +28,7 @@ public class NoteSqlRepository : INoteRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    
+
 
     public async Task DeleteNoteAsync(int id)
     {
@@ -49,7 +49,7 @@ public class NoteSqlRepository : INoteRepository
             .ToList();
     }
 
-    
+
 
     public async Task<Note> GetNoteByIdAsync(int id)
     {
@@ -67,4 +67,11 @@ public class NoteSqlRepository : INoteRepository
         _dbContext.Notes.Update(note);
         await _dbContext.SaveChangesAsync();
     }
+    public async Task<List<Note>> GetAllSharedWithUserAsync(string userId)
+{
+    return await _dbContext.Notes
+        .Where(n => n.SharedWith.Any(u => u.Id == userId) && n.UserId != userId)
+        .ToListAsync();
+}
+
 }

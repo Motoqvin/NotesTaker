@@ -15,9 +15,14 @@ public class UsersIdentityDb : IdentityDbContext<User, IdentityRole, string>
         base.OnModelCreating(builder);
 
         builder.Entity<Note>()
-            .HasOne(n => n.User)
-            .WithMany(u => u.Notes)
-            .HasForeignKey(n => n.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        .HasOne(n => n.User)
+        .WithMany(u => u.Notes)
+        .HasForeignKey(n => n.UserId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Note>()
+        .HasMany(n => n.SharedWith)
+        .WithMany(u => u.SharedNotes)
+        .UsingEntity(j => j.ToTable("NoteUserShares"));
     }
 }
