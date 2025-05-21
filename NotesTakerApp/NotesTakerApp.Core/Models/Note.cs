@@ -16,9 +16,10 @@ public class Note
 
     public string? SharedLink { get; set; }
 
-    // Foreign Key to User
     public string UserId { get; set; }
 
-    [ForeignKey("UserId")]
     public User User { get; set; }
+    public ICollection<User> SharedWith { get; set; } = new List<User>();
+    public List<NoteContributor> Contributors { get; set; } = new List<NoteContributor>();
+
 }

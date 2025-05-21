@@ -1,0 +1,101 @@
+@model IEnumerable<dynamic>
+@{
+    ViewData["Title"] = "Contributors";
+    var noteId = ViewData["NoteId"];
+}
+
+<main class="container mt-5">
+    <h3>Contributors for: @ViewData["NoteTitle"]</h3>
+    <hr />
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">No contributors have been added yet.</p>
+    }
+    else
+    {
+        <ul class="list-group mb-4">
+            @foreach (var user in Model)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <strong>@user.UserName</strong> &nbsp;
+                        <small class="text-muted">(@user.Email)</small>
+                    </span>
+                </li>
+            }
+        </ul>
+    }
+
+    <div class="card p-3 shadow-sm">
+        <h5 class="mb-3">Add Contributor</h5>
+        <div class="d-flex align-items-center gap-2">
+            <select id="userSelect" class="form-select" style="max-width: 300px;">
+                <option disabled selected>Loading users...</option>
+            </select>
+            <button class="btn btn-success" id="addContributorBtn">Add</button>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const noteId = urlParams.get('noteId');
+
+        async function loadAvailableUsers() {
+            try {
+                if (!noteId) {
+                    alert("Note ID is not available.");
+                    return;
+                }
+                const res = await fetch(`/Notes/GetAllUsersExceptOwners?noteId=${noteId}`);
+                const users = await res.json();
+                const select = document.getElementById("userSelect");
+
+                select.innerHTML = "";
+
+                if (!users.length) {
+                    const opt = document.createElement("option");
+                    opt.disabled = true;
+                    opt.textContent = "No users available to add";
+                    select.appendChild(opt);
+                    return;
+                }
+
+                users.forEach(u => {
+                    const option = document.createElement("option");
+                    option.value = u.id;
+                    option.textContent = u.userName || u.email;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.log(err);
+                alert("Failed to load users.");
+            }
+        }
+
+        document.getElementById("addContributorBtn").addEventListener("click", async () => {
+            const userId = document.getElementById("userSelect").value;
+            if (!userId) return alert("Select a user to add");
+
+            const confirmShare = confirm("Are you sure you want to share this note with the selected user?");
+            if (!confirmShare) return;
+
+            const res = await fetch("/Notes/Share", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ noteId, userId })
+            });
+
+            if (res.ok) {
+                alert("User added successfully.");
+                location.reload();
+            } else {
+                alert("Failed to add user.");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", loadAvailableUsers);
+    </script>
+}

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NotesTakerApp.Core.Models;
 using NotesTakerApp.Core.Repositories;
 using NotesTakerApp.Core.ViewModel;
