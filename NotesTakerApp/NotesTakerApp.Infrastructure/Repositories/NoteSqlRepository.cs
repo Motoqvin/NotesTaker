@@ -49,7 +49,14 @@ public class NoteSqlRepository : INoteRepository
             .ToList();
     }
 
-    
+    public async Task<List<Note>> GetNotesWhereUserIsContributorAsync(string userId)
+{
+    return await _dbContext.Notes
+        .Include(n => n.User)
+        .Include(n => n.Contributors)
+        .Where(n => n.Contributors.Any(c => c.UserId == userId))
+        .ToListAsync();
+}
 
     public async Task<Note> GetNoteByIdAsync(int id)
     {
