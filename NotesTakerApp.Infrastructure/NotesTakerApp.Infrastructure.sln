@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotesTakerApp.Infrastructure", "NotesTakerApp.Infrastructure.csproj", "{2E0CB5BF-C8CE-EDD9-1BD4-B7406F6BC5C5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E0CB5BF-C8CE-EDD9-1BD4-B7406F6BC5C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E0CB5BF-C8CE-EDD9-1BD4-B7406F6BC5C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E0CB5BF-C8CE-EDD9-1BD4-B7406F6BC5C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E0CB5BF-C8CE-EDD9-1BD4-B7406F6BC5C5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CADCBFD5-FB05-4901-8B93-1109C4220184}
+	EndGlobalSection
+EndGlobal
